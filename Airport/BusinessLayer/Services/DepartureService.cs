@@ -10,31 +10,33 @@ namespace BusinessLayer.Services
 {
     public class DepartureService : IService<Departure>
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public DepartureService(AirportContext context)
+        public DepartureService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _unitOfWork = new UnitOfWork(context);
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public bool ValidationForeignId(Departure ob)
         {
-            return _unitOfWork.Set<DataAccessLayer.Models.Aircraft>().Get()
+            return _unitOfWork.AircraftRepository.Get()
                         .FirstOrDefault(o => o.Id == ob.Aircraft.Id) != null &&
-                    _unitOfWork.Set<DataAccessLayer.Models.Crew>().Get().FirstOrDefault(o => o.Id == ob.Crew.Id) !=
+                    _unitOfWork.CrewRepository.Get().FirstOrDefault(o => o.Id == ob.Crew.Id) !=
                     null &&
-                    _unitOfWork.Set<DataAccessLayer.Models.Flight>().Get().FirstOrDefault(o => o.Id == ob.Flight.Id) !=
+                    _unitOfWork.FlightRepository.Get().FirstOrDefault(o => o.Id == ob.Flight.Id) !=
                     null;
         }
 
         public Departure IsExist(int id)
-            => Mapper.Map<DataAccessLayer.Models.Departure, Departure>(_unitOfWork.DepartureRepository.Get(id).FirstOrDefault());
+            => _mapper.Map<DataAccessLayer.Models.Departure, Departure>(_unitOfWork.DepartureRepository.Get(id).FirstOrDefault());
 
         public DataAccessLayer.Models.Departure ConvertToModel(Departure departure)
-            => Mapper.Map<Departure, DataAccessLayer.Models.Departure>(departure);
+            => _mapper.Map<Departure, DataAccessLayer.Models.Departure>(departure);
 
         public List<Departure> GetAll()
-            => Mapper.Map<List<DataAccessLayer.Models.Departure>, List<Departure>>(_unitOfWork.DepartureRepository.Get());
+            => _mapper.Map<List<DataAccessLayer.Models.Departure>, List<Departure>>(_unitOfWork.DepartureRepository.Get());
 
         public Departure GetDetails(int id) => IsExist(id);
 
@@ -58,7 +60,7 @@ namespace BusinessLayer.Services
 
         public void RemoveAll()
         {
-            _unitOfWork.Set<DataAccessLayer.Models.Departure>().Delete();
+            _unitOfWork.DepartureRepository.Delete();
             _unitOfWork.SaveChages();
         }
     }

@@ -10,9 +10,14 @@ namespace BusinessLayer.Services
 {
     public class FlightService : IService<Flight>
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public FlightService(AirportContext context) => _unitOfWork = new UnitOfWork(context);
+        public FlightService(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
 
         public bool ValidationForeignId(Flight ob)
         {
@@ -23,11 +28,11 @@ namespace BusinessLayer.Services
             return true;
         }
 
-        public Flight IsExist(int id) => Mapper.Map<DataAccessLayer.Models.Flight, Flight>(_unitOfWork.FlightRepository.Get(id).FirstOrDefault());
+        public Flight IsExist(int id) => _mapper.Map<DataAccessLayer.Models.Flight, Flight>(_unitOfWork.FlightRepository.Get(id).FirstOrDefault());
 
-        public DataAccessLayer.Models.Flight ConvertToModel(Flight flight) => Mapper.Map<Flight, DataAccessLayer.Models.Flight>(flight);
+        public DataAccessLayer.Models.Flight ConvertToModel(Flight flight) => _mapper.Map<Flight, DataAccessLayer.Models.Flight>(flight);
         
-        public List<Flight> GetAll() => Mapper.Map<List<DataAccessLayer.Models.Flight>, List<Flight>>(_unitOfWork.FlightRepository.Get());
+        public List<Flight> GetAll() => _mapper.Map<List<DataAccessLayer.Models.Flight>, List<Flight>>(_unitOfWork.FlightRepository.Get());
 
         public Flight GetDetails(int id) => IsExist(id);
 

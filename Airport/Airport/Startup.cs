@@ -49,8 +49,12 @@ namespace PresentationLayer
             services.AddScoped<IService<Shared.DTO.Stewardess>, StewardessService>();
             services.AddScoped<IService<Shared.DTO.Ticket>, TicketService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IMapper>(m => GetAutoMapperConfig().CreateMapper());           
+        }
 
-            Mapper.Initialize(cfg =>
+        private MapperConfiguration GetAutoMapperConfig()
+        {
+            var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Aircraft, Shared.DTO.Aircraft>();
                 cfg.CreateMap<Shared.DTO.Aircraft, Aircraft>();
@@ -59,10 +63,11 @@ namespace PresentationLayer
                 cfg.CreateMap<Flight, Shared.DTO.Flight>();
                 cfg.CreateMap<Shared.DTO.Flight, Flight>();
                 cfg.CreateMap<Pilot, Shared.DTO.Pilot>();
-                cfg.CreateMap<Shared.DTO.Pilot, Pilot>().ForMember(p=>p.Crew, opt=>opt.Ignore());
+                cfg.CreateMap<Shared.DTO.Pilot, Pilot>().ForMember(p => p.Crew, opt => opt.Ignore());
                 cfg.CreateMap<Shared.DTO.Crew, Crew>();
-
             });
+
+            return config;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

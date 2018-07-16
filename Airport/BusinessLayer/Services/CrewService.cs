@@ -10,11 +10,13 @@ namespace BusinessLayer.Services
 {
     public class CrewService : IService<Crew>
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public CrewService(AirportContext context)
+        public CrewService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _unitOfWork = new UnitOfWork(context);
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public bool ValidationForeignId(Crew ob)
@@ -28,11 +30,11 @@ namespace BusinessLayer.Services
             
         }
 
-        public Crew IsExist(int id) => Mapper.Map<DataAccessLayer.Models.Crew, Crew>(_unitOfWork.CrewRepository.Get(id).FirstOrDefault());
+        public Crew IsExist(int id) => _mapper.Map<DataAccessLayer.Models.Crew, Crew>(_unitOfWork.CrewRepository.Get(id).FirstOrDefault());
 
-        public DataAccessLayer.Models.Crew ConvertToModel(Crew crew) => Mapper.Map<Crew, DataAccessLayer.Models.Crew>(crew);
+        public DataAccessLayer.Models.Crew ConvertToModel(Crew crew) => _mapper.Map<Crew, DataAccessLayer.Models.Crew>(crew);
 
-        public List<Crew> GetAll() => Mapper.Map<List<DataAccessLayer.Models.Crew>, List<Crew>>(_unitOfWork.CrewRepository.Get());
+        public List<Crew> GetAll() => _mapper.Map<List<DataAccessLayer.Models.Crew>, List<Crew>>(_unitOfWork.CrewRepository.Get());
 
         public Crew GetDetails(int id) => IsExist(id);
 

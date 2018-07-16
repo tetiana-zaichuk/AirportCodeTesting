@@ -18,20 +18,13 @@ namespace DataAccessLayer
             this.Context = context;
         }
 
-        public CrewRepository CrewRepository
-        {
-            get => _crewRepository ?? (_crewRepository = new CrewRepository(Context));
-        }
+        public IRepository<Crew> CrewRepository => _crewRepository ?? (_crewRepository = new CrewRepository(Context));
 
-        public FlightRepository FlightRepository => _flightRepository ?? (_flightRepository = new FlightRepository(Context));
+        public IRepository<Flight> FlightRepository => _flightRepository ?? (_flightRepository = new FlightRepository(Context));
 
-        public AircraftRepository AircraftRepository
-        {
-            get => _aircraftRepository ?? (_aircraftRepository = new AircraftRepository(Context));
-            set => throw new System.NotImplementedException();
-        }
+        public IRepository<Departure> DepartureRepository => _departureRepository ?? (_departureRepository = new DepartureRepository(Context));
 
-        public DepartureRepository DepartureRepository => _departureRepository ?? (_departureRepository = new DepartureRepository(Context));
+        public IRepository<Aircraft> AircraftRepository => _aircraftRepository ?? (_aircraftRepository = new AircraftRepository(Context));
 
         public IRepository<TEntity> Set<TEntity>() where TEntity : Entity
         {

@@ -11,20 +11,25 @@ namespace BusinessLayer.Services
     public class AircraftService : IService<Aircraft>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public AircraftService(IUnitOfWork unitOfWork) =>_unitOfWork = unitOfWork;
+        public AircraftService(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }       
 
         public bool ValidationForeignId(Aircraft ob)
             => _unitOfWork.Set<DataAccessLayer.Models.AircraftType>().Get().FirstOrDefault(o=>o.Id==ob.AircraftType.Id)!=null;
 
         public Aircraft IsExist(int id)
-            => Mapper.Map<DataAccessLayer.Models.Aircraft, Aircraft>(_unitOfWork.AircraftRepository.Get(id).FirstOrDefault());
+            => _mapper.Map<DataAccessLayer.Models.Aircraft, Aircraft>(_unitOfWork.AircraftRepository.Get(id).FirstOrDefault());
 
         public DataAccessLayer.Models.Aircraft ConvertToModel(Aircraft aircraft)
-            => Mapper.Map<Aircraft, DataAccessLayer.Models.Aircraft>(aircraft);
+            => _mapper.Map<Aircraft, DataAccessLayer.Models.Aircraft>(aircraft);
 
         public List<Aircraft> GetAll()
-            => Mapper.Map<List<DataAccessLayer.Models.Aircraft>, List<Aircraft>>(_unitOfWork.AircraftRepository.Get());
+            => _mapper.Map<List<DataAccessLayer.Models.Aircraft>, List<Aircraft>>(_unitOfWork.AircraftRepository.Get());
 
         public Aircraft GetDetails(int id) => IsExist(id);
 

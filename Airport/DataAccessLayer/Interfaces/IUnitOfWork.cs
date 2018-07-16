@@ -6,10 +6,10 @@ namespace DataAccessLayer.Interfaces
 {
     public interface IUnitOfWork
     {
-        CrewRepository CrewRepository { get; }
-        FlightRepository FlightRepository { get; }
-        AircraftRepository AircraftRepository { get; set; }
-        DepartureRepository DepartureRepository { get; }
+        IRepository<Crew> CrewRepository { get; }
+        IRepository<Flight> FlightRepository { get; }
+        IRepository<Aircraft> AircraftRepository { get;}
+        IRepository<Departure> DepartureRepository { get; }
 
         IRepository<TEntity> Set<TEntity>() where TEntity : Entity;
 

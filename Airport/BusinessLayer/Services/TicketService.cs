@@ -10,24 +10,26 @@ namespace BusinessLayer.Services
 {
     public class TicketService : IService<Ticket>
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public TicketService(AirportContext context)
+        public TicketService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _unitOfWork = new UnitOfWork(context);
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public bool ValidationForeignId(Ticket ob)
-            => _unitOfWork.Set<DataAccessLayer.Models.Flight>().Get().FirstOrDefault(o => o.Id == ob.FlightId) != null;
+            => _unitOfWork.FlightRepository.Get().FirstOrDefault(o => o.Id == ob.FlightId) != null;
 
         public Ticket IsExist(int id)
-            => Mapper.Map<DataAccessLayer.Models.Ticket, Ticket>(_unitOfWork.Set<DataAccessLayer.Models.Ticket>().Get(id).FirstOrDefault());
+            => _mapper.Map<DataAccessLayer.Models.Ticket, Ticket>(_unitOfWork.Set<DataAccessLayer.Models.Ticket>().Get(id).FirstOrDefault());
 
         public DataAccessLayer.Models.Ticket ConvertToModel(Ticket ticket)
-            => Mapper.Map<Ticket, DataAccessLayer.Models.Ticket>(ticket);
+            => _mapper.Map<Ticket, DataAccessLayer.Models.Ticket>(ticket);
 
         public List<Ticket> GetAll()
-            => Mapper.Map<List<DataAccessLayer.Models.Ticket>, List<Ticket>>(_unitOfWork.Set<DataAccessLayer.Models.Ticket>().Get());
+            => _mapper.Map<List<DataAccessLayer.Models.Ticket>, List<Ticket>>(_unitOfWork.Set<DataAccessLayer.Models.Ticket>().Get());
 
         public Ticket GetDetails(int id) => IsExist(id);
 

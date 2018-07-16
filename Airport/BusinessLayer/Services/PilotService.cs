@@ -10,20 +10,25 @@ namespace BusinessLayer.Services
 {
     public class PilotService : IService<Pilot>
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public PilotService(AirportContext context) => _unitOfWork = new UnitOfWork(context);
+        public PilotService(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
 
         public bool ValidationForeignId(Pilot ob) => true;
 
         public Pilot IsExist(int id)
-            => Mapper.Map<DataAccessLayer.Models.Pilot, Pilot>(_unitOfWork.Set<DataAccessLayer.Models.Pilot>().Get(id).FirstOrDefault());
+            => _mapper.Map<DataAccessLayer.Models.Pilot, Pilot>(_unitOfWork.Set<DataAccessLayer.Models.Pilot>().Get(id).FirstOrDefault());
 
         public DataAccessLayer.Models.Pilot ConvertToModel(Pilot pilot)
-            => Mapper.Map<Pilot, DataAccessLayer.Models.Pilot>(pilot);
+            => _mapper.Map<Pilot, DataAccessLayer.Models.Pilot>(pilot);
 
         public List<Pilot> GetAll()
-            => Mapper.Map<List<DataAccessLayer.Models.Pilot>, List<Pilot>>(_unitOfWork.Set<DataAccessLayer.Models.Pilot>().Get());
+            => _mapper.Map<List<DataAccessLayer.Models.Pilot>, List<Pilot>>(_unitOfWork.Set<DataAccessLayer.Models.Pilot>().Get());
 
         public Pilot GetDetails(int id) => IsExist(id);
 
