@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Airport.Tests.Repository;
 using AutoMapper;
 using BusinessLayer.Services;
 using DataAccessLayer.Interfaces;
 using DataAccessLayer.Models;
-using DataAccessLayer.Repository;
 using FakeItEasy;
 using NUnit.Framework;
 using DTO = Shared.DTO;
@@ -18,16 +15,18 @@ namespace Airport.Tests.Services
     {
         private readonly IUnitOfWork _fakeUnitOfWork;
         private readonly IRepository<Aircraft> _fakeAircraftRepository;
-        private IMapper _fakeMapper;
+        private readonly IRepository<AircraftType> _fakeAircraftTypeRepository;
+        private readonly IMapper _fakeMapper;
         private AircraftService _aircraftService;
         private int _aircraftId;
-        private Aircraft plane1;
-        private Aircraft plane2;
+        private Aircraft _plane1;
+        private DTO.Aircraft _plane1DTO;
 
         public AircraftServiceTests()
         {
-            _fakeAircraftRepository = A.Fake<IRepository<Aircraft>>();
             _fakeUnitOfWork = A.Fake<IUnitOfWork>();
+            _fakeAircraftRepository = A.Fake<IRepository<Aircraft>>();
+            _fakeAircraftTypeRepository = A.Fake<IRepository<AircraftType>>();
             _fakeMapper = A.Fake<IMapper>();
         }
 
@@ -35,7 +34,7 @@ namespace Airport.Tests.Services
         [SetUp]
         public void TestSetup()
         {
-            var plane1 = new Aircraft()
+            _plane1 = new Aircraft()
             {
                 AircraftName = "Strong",
                 AircraftType = new AircraftType() { AircraftModel = "Tupolev Tu-134", SeatsNumber = 80, Carrying = 47000 },
@@ -50,7 +49,7 @@ namespace Airport.Tests.Services
                 ExploitationTimeSpan = new DateTime(2020, 6, 10) - new DateTime(2011, 6, 10)
             };
 
-            var plane1DTO = new DTO.Aircraft
+            _plane1DTO = new DTO.Aircraft
             {
                 Id = _aircraftId,
                 AircraftName = "Strong",
@@ -60,9 +59,10 @@ namespace Airport.Tests.Services
             };
 
             _aircraftId = 1;
-            
-            A.CallTo(() => _fakeMapper.Map<Aircraft, Shared.DTO.Aircraft>(plane1)).Returns(plane1DTO);
 
+            A.CallTo(() => _fakeMapper.Map<Aircraft, DTO.Aircraft>(_plane1)).Returns(_plane1DTO);
+            A.CallTo(() => _fakeUnitOfWork.AircraftRepository).Returns(_fakeAircraftRepository);
+            A.CallTo(() => _fakeUnitOfWork.Set<AircraftType>()).Returns(_fakeAircraftTypeRepository);
             _aircraftService = new AircraftService(_fakeUnitOfWork, _fakeMapper);
         }
 
@@ -70,27 +70,54 @@ namespace Airport.Tests.Services
         [TearDown]
         public void TestTearDown()
         {
-           // _fakeAircraftRepository.Data.Clear();
+            // _fakeAircraftRepository.Data.Clear();
         }
 
         [Test]
-        public void IsExists_ShouldReturnAircraft_WhenAircraftExistsInRepository()
+        public void ValidationForeignId_Should_ReturnTrue_When_TypeExists()
         {
-            A.CallTo(() => _fakeAircraftRepository.Get(_aircraftId)).Returns(new List<Aircraft> { plane1 });
+            A.CallTo(() => _fakeUnitOfWork.Set<AircraftType>().Get(null)).Returns(new List<AircraftType> { _plane1.AircraftType });
+            var result = _aircraftService.ValidationForeignId(_plane1DTO);
+            Assert.IsTrue(result);
+        }
 
-            A.CallTo(() => _fakeUnitOfWork.AircraftRepository.Get(_aircraftId)).Returns(new List<Aircraft> { plane1 });
+        [Test]
+        public void ValidationForeignId_Should_ReturnFalse_When_TypeDoesntExist()
+        {
+            A.CallTo(() => _fakeUnitOfWork.Set<AircraftType>().Get(null)).Returns(new List<AircraftType> ());
+            var result = _aircraftService.ValidationForeignId(_plane1DTO);
+            Assert.IsFalse(result);
+        }
 
-            //A.CallTo(() => _fakeUnitOfWork.AircraftRepository).Returns(_fakeAircraftRepository);
-
+        [Test]
+        public void IsExists_ShouldReturnAircraftDto_WhenAircraftExists()
+        {
+            //A.CallTo(() => _fakeAircraftRepository.Get(_aircraftId)).Returns(new List<Aircraft> { _plane1 });
+            A.CallTo(() => _fakeUnitOfWork.AircraftRepository.Get(_aircraftId)).Returns(new List<Aircraft> { _plane1 });
             var result = _aircraftService.IsExist(_aircraftId);
-            Assert.IsNotNull(result);
+            Assert.AreEqual(_plane1DTO, result);
         }
 
         [Test]
-        public void Create_Should_CallRepositoryCreate_When_Called()
+        public void ConvertToModel_Should_ReturnModel_When_Called()
         {
-            A.CallTo(() => _fakeAircraftRepository.Create(A<Aircraft>.That.IsEqualTo(plane1), null)).MustHaveHappenedOnceExactly();
-            Assert.IsNotNull(result);
+            A.CallTo(() => _fakeMapper.Map<DTO.Aircraft, Aircraft>(_plane1DTO)).Returns(_plane1);
+            var result = _aircraftService.ConvertToModel(_plane1DTO);
+            Assert.AreEqual(_plane1, result);
+        }
+
+        [Test]
+        public void Add_Should_CallRepositoryCreate_When_Called()
+        {
+            _aircraftService.Add(_plane1DTO);
+            A.CallTo(() => _fakeAircraftRepository.Create(A<Aircraft>.That.IsInstanceOf(typeof(Aircraft)), null)).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void Update_Should_CallRepositoryUpdate_When_Called()
+        {
+            _aircraftService.Update(_plane1DTO);
+            A.CallTo(() => _fakeAircraftRepository.Update(A<Aircraft>.That.IsInstanceOf(typeof(Aircraft)), null)).MustHaveHappenedOnceExactly();
         }
     }
 }
