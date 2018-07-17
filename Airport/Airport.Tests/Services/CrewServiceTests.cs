@@ -37,26 +37,22 @@ namespace Airport.Tests.Services
         [SetUp]
         public void TestSetup()
         {
+            _crewId = 1;
             _crew1 = new Crew()
             {
-                Pilot = new Pilot() { FirstName = "Adam", LastName = "Black", Dob = new DateTime(1978, 03, 03), Experience = 9 },
-                Stewardesses = new List<Stewardess> { new Stewardess() { CrewId = 1, FirstName = "Anna", LastName = "Black", Dob = new DateTime(1993, 02, 03) } }
-            };
-            var _crew2 = new Crew()
-            {
-                Pilot = new Pilot() { FirstName = "John", LastName = "Smith", Dob = new DateTime(1983, 07, 11), Experience = 5 },
-                Stewardesses = new List<Stewardess> { new Stewardess() { CrewId = 2, FirstName = "Anna", LastName = "Red", Dob = new DateTime(1991, 01, 07) } }
+                Id = 1, Pilot = new Pilot() { Id = _crewId, FirstName = "Adam", LastName = "Black", Dob = new DateTime(1978, 03, 03), Experience = 9 },
+                Stewardesses = new List<Stewardess> { new Stewardess() { Id = 1, CrewId = 1, FirstName = "Anna", LastName = "Black", Dob = new DateTime(1993, 02, 03) } }
             };
 
             _crew1DTO = new DTO.Crew()
             {
-                Pilot = new DTO.Pilot() { FirstName = "Adam", LastName = "Black", Dob = new DateTime(1978, 03, 03), Experience = 9 },
-                Stewardesses = new List<DTO.Stewardess> { new DTO.Stewardess() { CrewId = 1, FirstName = "Anna", LastName = "Black", Dob = new DateTime(1993, 02, 03) } }
+                Id = 1, Pilot = new DTO.Pilot() { Id = _crewId, FirstName = "Adam", LastName = "Black", Dob = new DateTime(1978, 03, 03), Experience = 9 },
+                Stewardesses = new List<DTO.Stewardess> { new DTO.Stewardess() { Id = 1, CrewId = 1, FirstName = "Anna", LastName = "Black", Dob = new DateTime(1993, 02, 03) } }
             };
 
-            _crewId = 1;
-
             A.CallTo(() => _fakeMapper.Map<Crew, DTO.Crew>(_crew1)).Returns(_crew1DTO);
+            A.CallTo(() => _fakeMapper.Map<DTO.Crew, Crew>(_crew1DTO)).Returns(_crew1);
+
             A.CallTo(() => _fakeUnitOfWork.CrewRepository).Returns(_fakeCrewRepository);
             A.CallTo(() => _fakeUnitOfWork.Set<Pilot>()).Returns(_fakePilotRepository);
             A.CallTo(() => _fakeUnitOfWork.Set<Stewardess>()).Returns(_fakeStewardessRepository);
@@ -65,25 +61,31 @@ namespace Airport.Tests.Services
 
         // This method runs after each test.
         [TearDown]
-        public void TestTearDown()
-        {
-            // _fakeAircraftRepository.Data.Clear();
-        }
+        public void TestTearDown() { }
 
         [Test]
         public void ValidationForeignId_Should_ReturnTrue_When_PilotAndListStewardessesExist()
         {
             A.CallTo(() => _fakeUnitOfWork.Set<Pilot>().Get(null)).Returns(new List<Pilot> { _crew1.Pilot });
-            A.CallTo(() => _fakeUnitOfWork.Set<Stewardess>().Get(null)).Returns(new List<Stewardess> { _crew1.Stewardesses.First() });
+            A.CallTo(() => _fakeUnitOfWork.Set<Stewardess>().Get(_crewId)).Returns(new List<Stewardess> { _crew1.Stewardesses.First() });
             var result = _crewService.ValidationForeignId(_crew1DTO);
             Assert.IsTrue(result);
         }
 
         [Test]
-        public void ValidationForeignId_Should_ReturnFalse_When_PilotAndListStewardessesDontExist()
+        public void ValidationForeignId_Should_ReturnFalse_When_PilotDoesntExistListStewardessesExist()
         {
-            A.CallTo(() => _fakeUnitOfWork.Set<Pilot>().Get(null)).Returns(null);
-            A.CallTo(() => _fakeUnitOfWork.Set<Stewardess>().Get(null)).Returns(null);
+            A.CallTo(() => _fakeUnitOfWork.Set<Pilot>().Get(null)).Returns(new List<Pilot> {});
+            A.CallTo(() => _fakeUnitOfWork.Set<Stewardess>().Get(_crewId)).Returns(new List<Stewardess>{ _crew1.Stewardesses.First()});
+            var result = _crewService.ValidationForeignId(_crew1DTO);
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        public void ValidationForeignId_Should_ReturnFalse_When_StewardessesDontExistPilotExists()
+        {
+            A.CallTo(() => _fakeUnitOfWork.Set<Pilot>().Get(null)).Returns(new List<Pilot> { _crew1.Pilot });
+            A.CallTo(() => _fakeUnitOfWork.Set<Stewardess>().Get(_crewId)).Returns(new List<Stewardess> {});
             var result = _crewService.ValidationForeignId(_crew1DTO);
             Assert.IsFalse(result);
         }
@@ -91,7 +93,6 @@ namespace Airport.Tests.Services
         [Test]
         public void IsExists_ShouldReturnCrewDto_WhenCrewExists()
         {
-            //A.CallTo(() => _fakeAircraftRepository.Get(_crewId)).Returns(new List<Aircraft> { _plane1 });
             A.CallTo(() => _fakeUnitOfWork.CrewRepository.Get(_crewId)).Returns(new List<Crew> { _crew1 });
             var result = _crewService.IsExist(_crewId);
             Assert.AreEqual(_crew1DTO, result);
@@ -106,17 +107,51 @@ namespace Airport.Tests.Services
         }
 
         [Test]
+        public void GetAll_Should_ReturnListCrewDTO_When_Called()
+        {
+            A.CallTo(() => _fakeMapper.Map<List<Crew>, List<DTO.Crew>>(A<List<Crew>>.That.Contains(_crew1)))
+                .Returns(new List<DTO.Crew> { _crew1DTO });
+            A.CallTo(() => _fakeUnitOfWork.CrewRepository.Get(null)).Returns(new List<Crew> { _crew1 });
+            List<DTO.Crew> result = _crewService.GetAll();
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(new List<DTO.Crew> { _crew1DTO }, result);
+        }
+
+        [Test]
+        public void GetDetails_Should_ReturnCrewDTO_When_Called()
+        {
+            A.CallTo(() => _fakeUnitOfWork.CrewRepository.Get(_crewId)).Returns(new List<Crew> { _crew1 });
+            var result = _crewService.GetDetails(_crewId);
+            Assert.AreEqual(_crew1DTO, result);
+        }
+
+        [Test]
         public void Add_Should_CallRepositoryCreate_When_Called()
         {
             _crewService.Add(_crew1DTO);
-            A.CallTo(() => _fakeCrewRepository.Create(A<Crew>.That.IsInstanceOf(typeof(Crew)), null)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeUnitOfWork.CrewRepository.Create(_crew1, null)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void Update_Should_CallRepositoryUpdate_When_Called()
         {
             _crewService.Update(_crew1DTO);
-            A.CallTo(() => _fakeCrewRepository.Update(A<Crew>.That.IsInstanceOf(typeof(Crew)), null)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeUnitOfWork.CrewRepository.Update(_crew1, null)).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void Remove_Should_CallRepositoryRemove_When_Called()
+        {
+            _crewService.Remove(_crewId);
+            A.CallTo(() => _fakeUnitOfWork.CrewRepository.Delete(_crewId)).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void RemoveAll_Should_CallRepositoryRemoveAll_When_Called()
+        {
+            _crewService.RemoveAll();
+            A.CallTo(() => _fakeUnitOfWork.CrewRepository.Delete(null)).MustHaveHappenedOnceExactly();
         }
     }
 }

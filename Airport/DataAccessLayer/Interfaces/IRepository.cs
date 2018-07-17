@@ -12,7 +12,5 @@ namespace DataAccessLayer.Interfaces
         void Update(TEntity entity, string modifiedBy = null);
 
         void Delete(int? filter = null);
-
-        void Delete(TEntity entity);
     }
 }

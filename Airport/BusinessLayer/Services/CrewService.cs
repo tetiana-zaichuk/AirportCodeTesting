@@ -21,7 +21,7 @@ namespace BusinessLayer.Services
 
         public bool ValidationForeignId(Crew ob)
         {
-            if (ob.Stewardesses == null) return false;
+            //if (ob.Stewardesses == null) return false;
             foreach (var st in ob.Stewardesses)
             {
                 if (_unitOfWork.Set<DataAccessLayer.Models.Stewardess>().Get(st.Id).FirstOrDefault() == null) return false;
