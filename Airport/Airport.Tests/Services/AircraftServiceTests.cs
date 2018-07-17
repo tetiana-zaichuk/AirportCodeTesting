@@ -38,14 +38,14 @@ namespace Airport.Tests.Services
             _plane1 = new Aircraft()
             {
                 Id = _aircraftId, AircraftName = "Strong",
-                AircraftType = new AircraftType() { AircraftModel = "Tupolev Tu-134", SeatsNumber = 80, Carrying = 47000 },
+                AircraftType = new AircraftType() { Id = 1, AircraftModel = "Tupolev Tu-134", SeatsNumber = 80, Carrying = 47000 },
                 AircraftReleaseDate = new DateTime(2011, 6, 10), ExploitationTimeSpan = new DateTime(2021, 6, 10) - new DateTime(2011, 6, 10)
             };
 
             _plane1DTO = new DTO.Aircraft
             {
                 Id = _aircraftId, AircraftName = "Strong",
-                AircraftType = new DTO.AircraftType() { AircraftModel = "Tupolev Tu-134", SeatsNumber = 80, Carrying = 47000 },
+                AircraftType = new DTO.AircraftType() { Id = 1, AircraftModel = "Tupolev Tu-134", SeatsNumber = 80, Carrying = 47000 },
                 AircraftReleaseDate = new DateTime(2011, 6, 10), ExploitationTimeSpan = new DateTime(2021, 6, 10) - new DateTime(2011, 6, 10)
             };
 

@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Airport.Tests", "Airport.Tests\Airport.Tests.csproj", "{58F5C1CD-69B9-474D-BF08-A24083B73E74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportIntegrationTests", "AirportIntegrationTests\AirportIntegrationTests.csproj", "{F19347C0-88B6-4C81-B698-4670580581C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportIntegration.Tests", "AirportIntegrationTests\AirportIntegration.Tests.csproj", "{F19347C0-88B6-4C81-B698-4670580581C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportController.Tests", "AirportController.Tests\AirportController.Tests.csproj", "{C1441299-371B-41AF-9C6E-C55A6231F00D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{F19347C0-88B6-4C81-B698-4670580581C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F19347C0-88B6-4C81-B698-4670580581C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F19347C0-88B6-4C81-B698-4670580581C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1441299-371B-41AF-9C6E-C55A6231F00D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1441299-371B-41AF-9C6E-C55A6231F00D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1441299-371B-41AF-9C6E-C55A6231F00D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1441299-371B-41AF-9C6E-C55A6231F00D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
