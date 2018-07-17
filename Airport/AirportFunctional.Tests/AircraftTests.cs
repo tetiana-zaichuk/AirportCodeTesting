@@ -27,8 +27,7 @@ namespace AirportFunctional.Tests
         public AircraftTests()
         {
             _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
-            _client = _server.CreateClient();
-          
+            _client = _server.CreateClient();          
         }
 
         [SetUp]
